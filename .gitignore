@@ -1,5 +1,5 @@
 # pycharm
-./idea/*
+.idea/*
 
 # private keys
 client_secrets.json
