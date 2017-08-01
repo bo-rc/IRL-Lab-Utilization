@@ -48,7 +48,7 @@ def fetch_month(year, month):
     fetch = crawl(start_date, end_date)
     return fetch
 
-def get_hours(fetch, proj_number_PI_mapping):
+def get_hours(fetch, proj_number_PI_mapping, PI_list):
     PI_hours = {}
     dept_hours = {}
     
@@ -63,7 +63,7 @@ def get_hours(fetch, proj_number_PI_mapping):
         else:
             PI_hours[name] += value
     
-        d = PIs[name].dept
+        d = PI_list[name].dept
     
         for i in d:
             if i not in dept_hours.keys():
@@ -82,7 +82,7 @@ def get_monthly_report(year, month, proj_number_PI_mapping, PI_list):
 
     writer = pd.ExcelWriter('.'.join([title, 'xlsx']))
 
-    pi_hours, dept_hours = get_hours(fetch_month(year, month), proj_number_PI_mapping)
+    pi_hours, dept_hours = get_hours(fetch_month(year, month), proj_number_PI_mapping, PI_list)
 
     pi_data = pd.DataFrame(list(pi_hours.items()))
     pi_data.columns = ['name', 'hours']
