@@ -93,3 +93,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# secrets files
+client_secrets.json
+calendar.dat
