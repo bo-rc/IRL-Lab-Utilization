@@ -1,17 +1,18 @@
 import collections
 
 class PI:
-    PI_list = collections.defaultdict()
-    proj_list = collections.defaultdict(str)
+    
+    PI_dict = collections.defaultdict()
+    proj_dict = collections.defaultdict(str)
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
         self.dept = kwargs.get('dept', [])
         self.proj = kwargs.get('proj', [])
         # updating proj_list
-        PI.update_proj_list(self)
+        PI.update_proj_dict(self)
         
         # updating PI_list
-        PI.update_PI_list(self)
+        PI.update_PI_dict(self)
         
     
     def __repr__(self):
@@ -23,35 +24,35 @@ class PI:
     def add_proj(self, s):
         self.proj.append(s)
         
-    def update_proj_list(self):
+    def update_proj_dict(self):
         for p in self.proj:               
-            if p not in PI.proj_list.keys():
-                PI.proj_list[p] = self.name
+            if p not in PI.proj_dict.keys():
+                PI.proj_dict[p] = self.name
             else:
                 pass
             
-    def update_PI_list(self):
-        if self.name not in PI.PI_list.keys():
-            PI.PI_list[self.name] = self
+    def update_PI_dict(self):
+        if self.name not in PI.PI_dict.keys():
+            PI.PI_dict[self.name] = self
         else:
             for p in self.proj:
-                if p not in PI.PI_list[self.name].proj:
-                    PI.PI_list[self.name].add_proj(p)
+                if p not in PI.PI_dict[self.name].proj:
+                    PI.PI_dict[self.name].add_proj(p)
                 else:
                     pass
             for dept in self.dept:
-                if dept not in PI.PI_list[self.name].dept:
-                    PI.PI_list[self.name].add_dept(dept)
+                if dept not in PI.PI_dict[self.name].dept:
+                    PI.PI_dict[self.name].add_dept(dept)
                 else:
                     pass
     
     @classmethod
-    def get_PI_list(cls):
-        return cls.PI_list
+    def get_PI_dict(cls):
+        return cls.PI_dict
     
     @classmethod
-    def get_proj_list(cls):
-        return cls.proj_list
+    def get_proj_dict(cls):
+        return cls.proj_dict
 
 LuiSha = PI(name='Lui Sha',dept=['CS','CSL'],proj=['2016-08-100-02'])
 RomitChoudhury = PI(name='Romit Roy Choudhury',dept=['ECE','CSL'],proj=['2017-06-100-01'])
