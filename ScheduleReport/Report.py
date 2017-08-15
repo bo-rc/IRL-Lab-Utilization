@@ -76,6 +76,32 @@ def fetch_month(year = datetime.datetime.now().year, month = datetime.datetime.n
     end_date = start_date + relativedelta(months = +1)
     return crawl(start_date, end_date)
 
+def get_PI_cfop_hours_from_proj_hours(proj_hours):
+    PI_hours = {}
+    cfop_hours = {}
+    
+    for key, value in proj_hours.items():
+        if key not in proj_to_PI.keys():
+            raise RuntimeError("unknown project number from PI database, key = {}".format(key))
+        
+        name = proj_to_PI[key]
+    
+        if name not in PI_hours.keys():
+            PI_hours[name] = value
+        else:
+            PI_hours[name] += value
+    
+        cfop_list = PI_dict[name].proj.values()
+    
+        for cfop in cfop_list:
+            if cfop not in cfop_hours.keys():
+                cfop_hours[cfop] = value
+            else:
+                cfop_hours[cfop] += value
+
+    return PI_hours, cfop_hours
+
+
 def get_PI_app_hours_from_proj_hours(proj_hours):
     PI_hours = {}
     app_hours = {}
@@ -145,6 +171,7 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     
     writer = pd.ExcelWriter('./output/{}.xlsx'.format(title), engine='xlsxwriter')
 
+    # process pi_hours, dept_hours
     proj_hours, _ = fetch_range(start_date, end_date)
     
     pi_hours, dept_hours = get_PI_dept_hours_from_proj_hours(proj_hours)
@@ -169,6 +196,7 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     dept_df = dept_df.sort_values('hours', ascending=False)
     dept_df.reset_index(drop=True, inplace=True)
     
+    # process app_hours
     _, app_hours = get_PI_app_hours_from_proj_hours(proj_hours)
 
     app_list = []
@@ -185,10 +213,30 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     app_df = app_df.sort_values('hours', ascending=False)
     app_df.reset_index(drop=True, inplace=True)
 
+    # process cfop_hours
+    _, cfop_hours = get_PI_cfop_hours_from_proj_hours(proj_hours)
+    
+    cfop_list = []
+    for index, row in pi_df.iterrows():
+        key = row['name']
+        cfop = list(set(PI_dict[key].proj.values()))
+        cfop_list.append(cfop)
+
+    pi_df['cfop'] = pd.Series(cfop_list)
+    
+    cfop_df = pd.DataFrame(list(cfop_hours.items()))
+    cfop_df.columns = ['cfop', 'hours']
+       
+    cfop_df['percentage'] = 100 * cfop_df['hours'] / cfop_df['hours'].sum()
+    cfop_df = cfop_df.sort_values('hours', ascending=False)
+    cfop_df.reset_index(drop=True, inplace=True)    
+       
+    
     # write to excel files
     pi_df.to_excel(writer, 'PI hours')
     dept_df.to_excel(writer, 'department hours')
     app_df.to_excel(writer, 'unit(accumulative) hours')
+    cfop_df.to_excel(writer, 'cfop hours')
     writer.save()
 
     # calculating utilization
@@ -261,7 +309,7 @@ def get_days_record_range(start_year=2016, start_month=8, start_day=1,
     days_df['hours'] = days_df['hours'].astype(int)
 
     # write days record to files
-    days_df.to_csv('./output/days-record-{}.txt'.format(title), sep=' ', header=['#day', 'hours'], index=False)
+    days_df.to_csv('./output/days-record-{}.txt'.format(title), sep=' ', header=['#day', 'hours'], index = False)
 
     projs_df = pd.DataFrame(list(projs.items()))
     projs_df.columns = ['num', 'hours']
