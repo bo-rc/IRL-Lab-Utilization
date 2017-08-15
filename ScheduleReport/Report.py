@@ -197,7 +197,7 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     used_hours = pi_df['hours'].sum()
     utilization_rate = used_hours / total_hours * 100
     
-    plt.figure(figsize=(15,8))
+    plt.figure(figsize=(15,10))
     suptitle = ','.join([title, '(utilization = {:.{prec}f} %)'.format(utilization_rate, prec=1)])
     plt.suptitle(suptitle, y=1.0)
     sns.set_style("darkgrid")
