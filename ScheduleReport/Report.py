@@ -261,7 +261,7 @@ def get_days_record_range(start_year=2016, start_month=8, start_day=1,
     days_df['hours'] = days_df['hours'].astype(int)
 
     # write days record to files
-    days_df.to_csv('./output/days-record-{}.txt'.format(title), sep=' ', header=['#day', 'hours'])
+    days_df.to_csv('./output/days-record-{}.txt'.format(title), sep=' ', header=['#day', 'hours'], index=False)
 
     projs_df = pd.DataFrame(list(projs.items()))
     projs_df.columns = ['num', 'hours']
