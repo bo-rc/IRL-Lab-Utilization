@@ -76,6 +76,31 @@ def fetch_month(year = datetime.datetime.now().year, month = datetime.datetime.n
     end_date = start_date + relativedelta(months = +1)
     return crawl(start_date, end_date)
 
+def get_PI_app_hours_from_proj_hours(proj_hours):
+    PI_hours = {}
+    app_hours = {}
+    
+    for key, value in proj_hours.items():
+        if key not in proj_to_PI.keys():
+            raise RuntimeError("unknown project number from PI database, key = {}".format(key))
+        
+        name = proj_to_PI[key]
+    
+        if name not in PI_hours.keys():
+            PI_hours[name] = value
+        else:
+            PI_hours[name] += value
+    
+        app_list = PI_dict[name].app
+    
+        for app in app_list:
+            if app not in app_hours.keys():
+                app_hours[app] = value
+            else:
+                app_hours[app] += value
+
+    return PI_hours, app_hours
+
 def get_PI_dept_hours_from_proj_hours(proj_hours):
     PI_hours = {}
     dept_hours = {}
@@ -91,15 +116,14 @@ def get_PI_dept_hours_from_proj_hours(proj_hours):
         else:
             PI_hours[name] += value
     
-        d = PI_dict[name].dept
+        dept = PI_dict[name].dept
     
-        for i in d:
-            if i not in dept_hours.keys():
-                dept_hours[i] = value
-            else:
-                dept_hours[i] += value
+        if dept not in dept_hours.keys():
+            dept_hours[dept] = value
+        else:
+            dept_hours[dept] += value
 
-    return PI_hours, dept_hours
+    return PI_hours, dept_hours    
 
 
 def report_range(start_year=2016, start_month=8, start_day=1, 
@@ -118,17 +142,19 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     else:
         title = '{} to {}'.format(start_date, end_date)
     print(title)
+    
     writer = pd.ExcelWriter('./output/{}.xlsx'.format(title), engine='xlsxwriter')
 
     proj_hours, _ = fetch_range(start_date, end_date)
+    
     pi_hours, dept_hours = get_PI_dept_hours_from_proj_hours(proj_hours)
-
+    
     pi_df = pd.DataFrame(list(pi_hours.items()))
     pi_df.columns = ['name', 'hours']
     pi_df['percentage'] = 100 * pi_df['hours'] / pi_df['hours'].sum()
     pi_df = pi_df.sort_values('hours', ascending=False)
     pi_df.reset_index(drop=True, inplace=True)
-
+    
     dept_list = []
     for index, row in pi_df.iterrows():
         key = row['name']
@@ -142,10 +168,27 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     dept_df['percentage'] = 100 * dept_df['hours'] / dept_df['hours'].sum()
     dept_df = dept_df.sort_values('hours', ascending=False)
     dept_df.reset_index(drop=True, inplace=True)
+    
+    _, app_hours = get_PI_app_hours_from_proj_hours(proj_hours)
+
+    app_list = []
+    for index, row in pi_df.iterrows():
+        key = row['name']
+        app = PI_dict[key].app
+        app_list.append(app)
+
+    pi_df['app'] = pd.Series(app_list)
+
+    app_df = pd.DataFrame(list(app_hours.items()))
+    app_df.columns = ['unit(accumulative)', 'hours']
+    app_df['percentage'] = 100 * app_df['hours'] / app_df['hours'].sum()
+    app_df = app_df.sort_values('hours', ascending=False)
+    app_df.reset_index(drop=True, inplace=True)
 
     # write to excel files
     pi_df.to_excel(writer, 'PI hours')
-    dept_df.to_excel(writer, 'dept hours')
+    dept_df.to_excel(writer, 'department hours')
+    app_df.to_excel(writer, 'unit(accumulative) hours')
     writer.save()
 
     # calculating utilization
@@ -154,36 +197,43 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     used_hours = pi_df['hours'].sum()
     utilization_rate = used_hours / total_hours * 100
     
-    plt.figure(figsize=(10,8))
+    plt.figure(figsize=(15,8))
     suptitle = ','.join([title, '(utilization = {:.{prec}f} %)'.format(utilization_rate, prec=1)])
     plt.suptitle(suptitle, y=1.0)
     sns.set_style("darkgrid")
-    plt.subplot(1,2,1)
+    plt.subplot(1,3,1)
 
     ax1 = sns.barplot(x= pi_df['name'], y=pi_df['hours'], palette="muted")
     xlabels = []
     for index, row in pi_df.iterrows():
-        xlabel = row['name'] + '\n' + '(' + ','.join(row['dept']) + ')'
+        xlabel = row['name'] + '\n' + '(' + ','.join(row['app']) + ')'
         xlabels.append(xlabel)
     ax1.set(xticklabels=xlabels)
     
     for patch, percentage in zip(ax1.patches, pi_df['percentage']):
         height = patch.get_height()
-        ax1.text(patch.get_x()+patch.get_width()/2., height + height * 0.02, '{:2.1f}%'.format(percentage), ha="center") 
+        ax1.text(patch.get_x()+patch.get_width()/2., height + height* 0.02, '{:2.1f}%'.format(percentage), ha="center") 
 
     plt.xticks(rotation=90)
-
-    plt.subplot(1,2,2)
-    ax2 = sns.barplot(x=dept_df['dept'], y=dept_df['hours'], palette="muted")    
+    
+    plt.subplot(1,3,2)
+    ax2 = sns.barplot(x=dept_df['dept'], y=dept_df['hours'], palette="muted")
     
     for patch, percentage in zip(ax2.patches, dept_df['percentage']):
         height = patch.get_height()
         ax2.text(patch.get_x()+patch.get_width()/2., height + height * 0.02, '{:2.1f}%'.format(percentage), ha="center") 
    
+    plt.subplot(1,3,3)
+    ax3 = sns.barplot(x=app_df['unit(accumulative)'], y=app_df['hours'], palette="muted")
+    
+    for patch, percentage in zip(ax3.patches, app_df['percentage']):
+        height = patch.get_height()
+        ax3.text(patch.get_x()+patch.get_width()/2., height + height * 0.02, '{:2.1f}%'.format(percentage), ha="center") 
+   
     #left, right, top, bottom = plt.axis()
     #plt.axis((left, right, top+0.5, bottom))
     #plt.tight_layout()
-    plt.savefig('output/{}.jpg'.format(title), bbox_inches='tight')
+    plt.savefig('output/{}.jpg'.format(title))
     plt.show()
     
 
