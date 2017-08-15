@@ -6,7 +6,8 @@ class PI:
     proj_dict = collections.defaultdict(str)
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
-        self.dept = kwargs.get('dept', [])
+        self.dept = kwargs.get('dept', '')
+        self.app = kwargs.get('app', [])
         self.proj = kwargs.get('proj', [])
         # updating proj_list
         PI.update_proj_dict(self)
@@ -16,10 +17,10 @@ class PI:
         
     
     def __repr__(self):
-        return 'PI: {} '.format(self.name) + ','.join(self.dept) + ' ' + ','.join(self.proj)
+        return 'PI: {} '.format(self.name) + ' ' + self.dept + ' ' + ','.join(self.app) + ' ' + ','.join(self.proj)
     
-    def add_dept(self, s):
-        self.dept.append(s)
+    def add_app(self, s):
+        self.app.append(s)
         
     def add_proj(self, s):
         self.proj.append(s)
@@ -40,9 +41,9 @@ class PI:
                     PI.PI_dict[self.name].add_proj(p)
                 else:
                     pass
-            for dept in self.dept:
-                if dept not in PI.PI_dict[self.name].dept:
-                    PI.PI_dict[self.name].add_dept(dept)
+            for app in self.app:
+                if app not in PI.PI_dict[self.name].app:
+                    PI.PI_dict[self.name].add_app(app)
                 else:
                     pass
     
@@ -54,22 +55,22 @@ class PI:
     def get_proj_dict(cls):
         return cls.proj_dict
 
-LuiSha = PI(name='Lui Sha',dept=['CS','CSL'],proj=['2016-08-100-02'])
-RomitChoudhury = PI(name='Romit Roy Choudhury',dept=['ECE','CSL'],proj=['2017-06-100-01'])
-SayanMitra = PI(name='Sayan Mitra',dept=['ECE','CSL'],proj=['2016-06-103-01'])
-GirishKrishnan = PI(name='Girish Krishnan',dept=['ISE','CSL'],proj=['2017-03-106-01'])
-SethHutchinson = PI(name='Seth Hutchinson', dept=['ECE', 'CSL'],proj=['2016-10-103-02', '2016-10-103-01'])
-GraceGao = PI(name='Grace Gao', dept=['AE', 'CSL'], proj=['2016-11-103-01'])
-MinhDo = PI(name='Minh Do', dept=['ECE', 'CSL'], proj=['2016-11-103-02'])
-TimBretl = PI(name='Timothy Bretl', dept=['AE', 'CSL'], proj=['2017-02-103-02'])
-MichaelSelig = PI(name='Michael Selig', dept=['AE'], proj=['2017-02-102-01'])
-HwPark = PI(name='Hae-Won Park', dept=['ME', 'CSL'], proj=['2017-02-101-01'])
-AimyWissa = PI(name='Aimy Wissa', dept=['ME'], proj=['2017-04-101-01'])
-SayanMitra = PI(name='Sayan Mitra', dept=['ECE', 'CSL'], proj=['2017-03-103-01'])
-PhilipAnsell = PI(name='Philip Ansell', dept=['AE'], proj=['2017-01-102-01'])
-RomitRoyChoudhury = PI(name='Romit Roy Choudhury', dept=['ECE', 'CSL'], proj=['2016-08-100-01', '2017-02-100-01'])
-GirishChowdhary = PI(name='Girish Chowdhary', dept=['ABE', 'CSL'], proj=['2016-11-105-01', '2016-10-105-01'])
-AmyLaViers = PI(name='Amy LaViers', dept=['ME'], proj=['2016-12-101-01'])
-NairaHovakimyan = PI(name='Naira Hovakimyan', dept=['ME','AE', 'CSL'], proj=['2016-08-101-01'])
-PaulKwiat = PI(name='Paul G Kwiat', dept=['PHYS', 'ECE'], proj=['2016-08-104-01'])
-DanWork = PI(name='Dan Work', dept=['CEE', 'CSL'], proj=['2017-06-107-01'])
+LuiSha = PI(name='Lui Sha',dept='CS', app=['CS','CSL'],proj=['2016-08-100-02'])
+RomitChoudhury = PI(name='Romit Roy Choudhury',dept='ECE', app=['ECE','CSL'],proj=['2017-06-100-01'])
+SayanMitra = PI(name='Sayan Mitra',dept='ECE', app=['ECE','CSL'],proj=['2016-06-103-01'])
+GirishKrishnan = PI(name='Girish Krishnan',dept='ISE', app=['ISE','CSL'],proj=['2017-03-106-01'])
+SethHutchinson = PI(name='Seth Hutchinson', dept='ECE', app=['ECE', 'CSL'],proj=['2016-10-103-02', '2016-10-103-01'])
+GraceGao = PI(name='Grace Gao', dept='AE', app=['AE', 'CSL'], proj=['2016-11-103-01'])
+MinhDo = PI(name='Minh Do', dept='ECE', app=['ECE', 'CSL'], proj=['2016-11-103-02'])
+TimBretl = PI(name='Timothy Bretl', dept='AE', app=['AE', 'CSL'], proj=['2017-02-103-02'])
+MichaelSelig = PI(name='Michael Selig', dept='AE', app=['AE'], proj=['2017-02-102-01'])
+HwPark = PI(name='Hae-Won Park', dept='ME', app=['ME', 'CSL'], proj=['2017-02-101-01'])
+AimyWissa = PI(name='Aimy Wissa', dept='ME', app=['ME'], proj=['2017-04-101-01'])
+SayanMitra = PI(name='Sayan Mitra', dept='ECE', app=['ECE', 'CSL'], proj=['2017-03-103-01'])
+PhilipAnsell = PI(name='Philip Ansell', dept='AE', app=['AE'], proj=['2017-01-102-01'])
+RomitRoyChoudhury = PI(name='Romit Roy Choudhury', dept='ECE', app=['ECE', 'CSL'], proj=['2016-08-100-01', '2017-02-100-01'])
+GirishChowdhary = PI(name='Girish Chowdhary', dept='ABE', app=['ABE', 'CSL'], proj=['2016-11-105-01', '2016-10-105-01'])
+AmyLaViers = PI(name='Amy LaViers', dept='ME', app=['ME'], proj=['2016-12-101-01'])
+NairaHovakimyan = PI(name='Naira Hovakimyan', dept='ME', app=['ME','AE', 'CSL'], proj=['2016-08-101-01'])
+PaulKwiat = PI(name='Paul G Kwiat', dept='PHYS', app=['PHYS', 'ECE'], proj=['2016-08-104-01'])
+DanWork = PI(name='Dan Work', dept='CEE', app=['CEE', 'CSL'], proj=['2017-06-107-01'])
