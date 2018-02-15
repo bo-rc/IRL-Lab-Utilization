@@ -162,11 +162,7 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     projs, days = fetch_range(start_date, end_date)
 
     # figure title
-    title = ''
-    if end_date <= start_date + relativedelta(months = +1):
-        title = '{}-{}'.format(start_date.year, start_date.month)  
-    else:
-        title = '{} to {}'.format(start_date, end_date)
+    title = '{} to {}'.format(start_date, end_date)
     print(title)
     
     writer = pd.ExcelWriter('./output/{}.xlsx'.format(title), engine='xlsxwriter')

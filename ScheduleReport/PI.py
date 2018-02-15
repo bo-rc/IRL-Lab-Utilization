@@ -55,6 +55,9 @@ class PI:
     def get_proj_dict(cls):
         return cls.proj_dict
 
+# Here starts the database
+# You can modify this section for each PI, 
+# or add PI entries to update the database.
 LuiSha = PI(name='Lui Sha',dept='CS', app=['CS','CSL'],proj={'2016-08-100-02': 'cfop_SHA'})
 RomitChoudhury = PI(name='Romit Roy Choudhury',dept='ECE', app=['ECE','CSL'],proj={'2017-06-100-01': 'cfop_CHOUDHURY'})
 # yes, you can have duplicate, as long as the PI name is the same, they will merge as a same entry in the PI_dict
@@ -72,5 +75,7 @@ PhilipAnsell = PI(name='Philip Ansell', dept='AE', app=['AE'], proj={'2017-01-10
 GirishChowdhary = PI(name='Girish Chowdhary', dept='ABE', app=['ABE', 'CSL'], proj={'2016-11-105-01': 'cfop_GC', '2016-10-105-01': 'cfop_GC'})
 AmyLaViers = PI(name='Amy LaViers', dept='ME', app=['ME'], proj={'2016-12-101-01': 'cfop_LAVIER'})
 NairaHovakimyan = PI(name='Naira Hovakimyan', dept='ME', app=['ME','AE', 'CSL'], proj={'2016-08-101-01': 'cfop_NH'})
-PaulKwiat = PI(name='Paul G Kwiat', dept='PHYS', app=['PHYS', 'ECE'], proj={'2016-08-104-01': 'cfop_KWIAT'})
+PaulKwiat = PI(name='Paul G Kwiat', dept='PHYS', app=['PHYS', 'ECE'], proj={'2016-08-104-01': 'cfop_KWIAT', '2018-01-104-01': 'cfop_KWIAT'})
 DanWork = PI(name='Dan Work', dept='CEE', app=['CEE', 'CSL'], proj={'2017-06-107-01': 'cfop_WORK'})
+SibinMohan = PI(name='Sibin Mohan', dept='CS', app=['CS', 'CSL'], proj={'2017-12-100-01': 'cfop_sibin'})
+GeirDullerud = PI(name='Geir Dullerud', dept='ME', app=['ME', 'CS', 'CSL'], proj={'2017-09-101-01': 'cfop_DULLERUD'})
