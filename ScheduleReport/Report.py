@@ -155,7 +155,7 @@ def get_PI_dept_hours_from_proj_hours(proj_hours):
 def report_range(start_year=2016, start_month=8, start_day=1, 
                  end_year=datetime.date.today().year, 
                  end_month=datetime.date.today().month, 
-                 end_day=datetime.date.today().day):
+                 end_day=datetime.date.today().day, wide_figure=False):
     
     start_date = datetime.date(start_year, start_month, start_day)
     end_date = datetime.date(end_year, end_month, end_day)
@@ -240,8 +240,11 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     total_hours = 8.0 * days
     used_hours = pi_df['hours'].sum()
     utilization_rate = used_hours / total_hours * 100
-    
-    plt.figure(figsize=(15,12))
+
+    if wide_figure:
+        plt.figure(figsize=(30,12))
+    else:
+        plt.figure(figsize=(15,12))
     suptitle = ','.join([title, '(utilization = {:.{prec}f} %)'.format(utilization_rate, prec=1)])
     plt.suptitle(suptitle, y=1.0)
     sns.set_style("darkgrid")
@@ -259,7 +262,7 @@ def report_range(start_year=2016, start_month=8, start_day=1,
         ax1.text(patch.get_x()+patch.get_width()/2., height + height* 0.02, '{:2.1f}%'.format(percentage), ha="center") 
 
     plt.xticks(rotation=90)
-    
+
     plt.subplot(1,3,2)
     ax2 = sns.barplot(x=dept_df['dept'], y=dept_df['hours'], palette="muted")
     
