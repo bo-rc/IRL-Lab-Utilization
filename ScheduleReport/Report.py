@@ -155,7 +155,7 @@ def get_PI_dept_hours_from_proj_hours(proj_hours):
 def report_range(start_year=2016, start_month=8, start_day=1, 
                  end_year=datetime.date.today().year, 
                  end_month=datetime.date.today().month, 
-                 end_day=datetime.date.today().day, wide_figure=False):
+                 end_day=datetime.date.today().day, wide_figure=False, day_hours=8.0, work_days_per_week=7.0):
     
     start_date = datetime.date(start_year, start_month, start_day)
     end_date = datetime.date(end_year, end_month, end_day)
@@ -209,6 +209,13 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     app_df = app_df.sort_values('hours', ascending=False)
     app_df.reset_index(drop=True, inplace=True)
 
+    # process proj hours
+    proj_df = pd.DataFrame(list(proj_hours.items()))
+    proj_df.columns = ['project', 'hours']
+    proj_df['percentage'] = 100 * proj_df['hours'] / proj_df['hours'].sum()
+    proj_df = proj_df.sort_values('hours', ascending=False)
+    proj_df.reset_index(drop=True, inplace=True)
+
     # process cfop_hours
     _, cfop_hours = get_PI_cfop_hours_from_proj_hours(proj_hours)
     
@@ -232,12 +239,13 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     pi_df.to_excel(writer, 'PI hours')
     dept_df.to_excel(writer, 'department hours')
     app_df.to_excel(writer, 'unit(accumulative) hours')
+    proj_df.to_excel(writer, 'project hours')
     cfop_df.to_excel(writer, 'cfop hours')
     writer.save()
 
     # calculating utilization
     days = (end_date - start_date).days
-    total_hours = 8.0 * days
+    total_hours = day_hours * days * work_days_per_week / 7.0
     used_hours = pi_df['hours'].sum()
     utilization_rate = used_hours / total_hours * 100
 
