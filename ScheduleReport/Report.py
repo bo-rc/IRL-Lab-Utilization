@@ -25,6 +25,7 @@ def crawl(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()
     
     projs = {}
     days = {}
+    users = {}
     
     while True:
         events = service.events().list(calendarId='irl1.uiuc@gmail.com', pageToken=page_token).execute()
@@ -40,33 +41,44 @@ def crawl(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()
                     for key, value in items:
                         if key == 'description':
                             pieces = value.split('PROJ:')
-                            pieces = pieces[-1].split('\n')
-                            num = pieces[0].strip()
+                            pieces_proj = pieces[-1].split('\n')
+                            num = pieces_proj[0].strip()
+
+                            peices_user = pieces[0].split(':')[-1].split('\n')
+                            user = peices_user[0].strip()
+
                             if num[:3] == '201': # 2016, 2017, 201x
                                 deltaTime = dateutil.parser.parse(event['end']['dateTime']) - dateutil.parser.parse(event['start']['dateTime'])
                                 time_h = deltaTime.seconds/3600
                                 
-                                # add to proj-time
-                                if num in projs.keys():                                    
-                                    projs[num] += time_h
-                                else:
+                                # add to proj-time and proj-user
+                                if num not in projs.keys():
                                     projs[num] = time_h
+                                    users[num] = []
+                                    users[num].append(user)
+                                else:
+                                    projs[num] += time_h
+                                    if user not in users[num]:
+                                        users[num].append(user)
                                 
                                 # add to day-time
                                 days_date = dateutil.parser.parse(event['start']['dateTime'])
                                 days_key = str(days_date).split(' ')[0]
                                 
-                                if days_key in days.keys():
-                                    days[days_key] += time_h
-                                else:
+                                if days_key not in days.keys():
                                     days[days_key] = time_h
+                                else:
+                                    days[days_key] += time_h
+
+                                if user == 'Hoff, Jonathan Edward':
+                                    print(event['start']['dateTime'], event['end']['dateTime'])
                                 
                     
         page_token = events.get('nextPageToken')
         if not page_token:
             break
             
-    return projs, days
+    return projs, days, users
 
 def fetch_range(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()):
     return crawl(start_date, end_date)
@@ -159,7 +171,6 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     
     start_date = datetime.date(start_year, start_month, start_day)
     end_date = datetime.date(end_year, end_month, end_day)
-    projs, days = fetch_range(start_date, end_date)
 
     # figure title
     title = '{} to {}'.format(start_date, end_date)
@@ -168,7 +179,7 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     writer = pd.ExcelWriter('./output/{}.xlsx'.format(title), engine='xlsxwriter')
 
     # process pi_hours, dept_hours
-    proj_hours, _ = fetch_range(start_date, end_date)
+    proj_hours, _, proj_users = fetch_range(start_date, end_date)
     
     pi_hours, dept_hours = get_PI_dept_hours_from_proj_hours(proj_hours)
     
@@ -213,6 +224,7 @@ def report_range(start_year=2016, start_month=8, start_day=1,
     proj_df = pd.DataFrame(list(proj_hours.items()))
     proj_df.columns = ['project', 'hours']
     proj_df['percentage'] = 100 * proj_df['hours'] / proj_df['hours'].sum()
+    proj_df['users'] = proj_df['project'].map(proj_users)
     proj_df = proj_df.sort_values('hours', ascending=False)
     proj_df.reset_index(drop=True, inplace=True)
 
@@ -307,7 +319,7 @@ def get_days_record_range(start_year=2016, start_month=8, start_day=1,
     end_date = datetime.date(end_year, end_month, end_day)
     
     title = '{}-{}'.format(start_date, end_date)
-    projs, days = fetch_range(start_date, end_date)
+    projs, days, _ = fetch_range(start_date, end_date)
 
     days_df = pd.DataFrame(list(days.items()))
     days_df.columns = ['day', 'hours']
