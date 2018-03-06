@@ -69,10 +69,6 @@ def crawl(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()
                                     days[days_key] = time_h
                                 else:
                                     days[days_key] += time_h
-
-                                if user == 'Hoff, Jonathan Edward':
-                                    print(event['start']['dateTime'], event['end']['dateTime'])
-                                
                     
         page_token = events.get('nextPageToken')
         if not page_token:
@@ -80,13 +76,16 @@ def crawl(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()
             
     return projs, days, users
 
+
 def fetch_range(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()):
     return crawl(start_date, end_date)
+
 
 def fetch_month(year = datetime.datetime.now().year, month = datetime.datetime.now().month):
     start_date = datetime.date(year,month,1)
     end_date = start_date + relativedelta(months = +1)
     return crawl(start_date, end_date)
+
 
 def get_PI_cfop_hours_from_proj_hours(proj_hours):
     PI_hours = {}
@@ -138,6 +137,7 @@ def get_PI_app_hours_from_proj_hours(proj_hours):
                 app_hours[app] += value
 
     return PI_hours, app_hours
+
 
 def get_PI_dept_hours_from_proj_hours(proj_hours):
     PI_hours = {}
@@ -334,6 +334,7 @@ def get_days_record_range(start_year=2016, start_month=8, start_day=1,
     projs_df.columns = ['num', 'hours']
     projs_df = projs_df.sort_values('hours', ascending=False)
     projs_df.reset_index(drop=True, inplace=True)
+
 
 def get_days_record(start_year=2016, start_month=8, start_day=1):
     return get_days_record_range(start_year, start_month, start_day)
