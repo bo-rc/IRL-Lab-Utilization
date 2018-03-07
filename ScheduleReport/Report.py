@@ -109,6 +109,7 @@ def crawl_detail(start_date = datetime.date(2016, 7, 1), end_date = datetime.dat
                                 entry = dict()
                                 entry['Project'] = num
                                 entry['PI'] = proj_to_PI[num]
+                                entry['CFOP'] = PI_dict[str(entry['PI'])].proj[num]
                                 entry['Dept (PI Home)'] = PI_dict[str(entry['PI'])].dept
                                 entry['User (Person reserving)'] = user
                                 entry['Start Time'] = event['start']['dateTime']
