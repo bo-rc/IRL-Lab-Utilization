@@ -1,11 +1,15 @@
 from .PI import PI
 
-# Here starts the database
-# You can modify this section for each PI,
-# or add PI entries to update the database.
+"""
+Here starts the database
+ -  You can modify this section for each PI, or add PI entries to update the database.
+ -  PI.dept is the home department of the PI
+ -  PI.app is the appointments of the PI, starting with the PI's home department
+ - You may have duplicates, as long as the PI name is the same, they will merge as a same entry
+"""
 LuiSha = PI(name='Lui Sha',dept='CS', app=['CS','CSL'],proj={'2016-08-100-02': 'cfop_SHA'})
 RomitChoudhury = PI(name='Romit Roy Choudhury',dept='ECE', app=['ECE','CSL'],proj={'2017-06-100-01': 'cfop_CHOUDHURY'})
-# You may have duplicates, as long as the PI name is the same, they will merge as a same entry in the PI_dict
+# Yes, you may have duplicates, as long as the PI name is the same, they will merge as a same entry in the PI_dict
 RomitRoyChoudhury = PI(name='Romit Roy Choudhury', dept='ECE', app=['ECE', 'CSL'], proj={'2016-08-100-01': 'cfop_RRC', '2017-02-100-01': 'cfop_RRC'})
 SayanMitra = PI(name='Sayan Mitra',dept='ECE', app=['ECE','CSL'],proj={'2016-06-103-01': 'cfop_MITRA', '2017-03-103-01': 'cfop_MITRA'})
 GirishKrishnan = PI(name='Girish Krishnan',dept='ISE', app=['ISE','CSL'],proj={'2017-03-106-01': 'cfop_KRISHNAN'})

@@ -16,7 +16,7 @@ from .Database import *
 proj_to_PI = PI.get_proj_dict()
 PI_dict = PI.get_PI_dict()
 
-def crawl(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()):
+def crawl_report(start_date = datetime.date(2016, 7, 1), end_date = datetime.date.today()):
     # Authenticate and construct service.
     service, flags = sample_tools.init(
         ' ', 'calendar', 'v3', ' ', ' ',
@@ -77,14 +77,75 @@ def crawl(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()
     return projs, days, users
 
 
+def crawl_detail(start_date = datetime.date(2016, 7, 1), end_date = datetime.date.today()):
+    # Authenticate and construct service.
+    service, flags = sample_tools.init(
+        ' ', 'calendar', 'v3', ' ', ' ',
+        scope='https://www.googleapis.com/auth/calendar.readonly')
+    page_token = None
+
+    entries = []
+    while True:
+        events = service.events().list(calendarId='irl1.uiuc@gmail.com', pageToken=page_token).execute()
+        for event in events['items']:
+            if 'start' in event.keys():
+                e_date_str = event['start']['dateTime']
+                e_date_str = e_date_str.split('T')[0].split('-')
+
+                e_date = datetime.date(int(e_date_str[0]), int(e_date_str[1]), int(e_date_str[2]))
+
+                if e_date >= start_date and e_date < end_date:
+                    items = event.items()
+                    for key, value in items:
+                        if key == 'description':
+                            pieces = value.split('PROJ:')
+                            pieces_proj = pieces[-1].split('\n')
+                            num = pieces_proj[0].strip()
+
+                            peices_user = pieces[0].split(':')[-1].split('\n')
+                            user = peices_user[0].strip()
+
+                            if num[:3] == '201': # 2016, 2017, 201x
+                                entry = dict()
+                                entry['Project'] = num
+                                entry['PI'] = proj_to_PI[num]
+                                entry['Dept (PI Home)'] = PI_dict[str(entry['PI'])].dept
+                                entry['User (Person reserving)'] = user
+                                entry['Start Time'] = event['start']['dateTime']
+                                entry['End Time'] = event['end']['dateTime']
+                                deltaTime = dateutil.parser.parse(event['end']['dateTime']) - dateutil.parser.parse(event['start']['dateTime'])
+                                hours = deltaTime.seconds/3600
+                                entry['Hours'] = str(hours)
+
+                                entries.append(entry)
+
+
+        page_token = events.get('nextPageToken')
+        if not page_token:
+            break
+
+    df = pd.DataFrame(entries, columns=entries[0].keys())
+    return df
+
+
 def fetch_range(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()):
-    return crawl(start_date, end_date)
+    return crawl_report(start_date, end_date)
+
+
+def fetch_detail_range(start_date = datetime.date(2016,7,1), end_date = datetime.date.today()):
+    return crawl_detail(start_date, end_date)
 
 
 def fetch_month(year = datetime.datetime.now().year, month = datetime.datetime.now().month):
     start_date = datetime.date(year,month,1)
     end_date = start_date + relativedelta(months = +1)
-    return crawl(start_date, end_date)
+    return crawl_report(start_date, end_date)
+
+
+def fetch_detail_month(year = datetime.datetime.now().year, month = datetime.datetime.now().month):
+    start_date = datetime.date(year,month,1)
+    end_date = start_date + relativedelta(months = +1)
+    return crawl_detail(start_date, end_date)
 
 
 def get_PI_cfop_hours_from_proj_hours(proj_hours):
@@ -162,6 +223,30 @@ def get_PI_dept_hours_from_proj_hours(proj_hours):
             dept_hours[dept] += value
 
     return PI_hours, dept_hours    
+
+
+def detail_range(start_year=2016, start_month=8, start_day=1,
+                 end_year=datetime.date.today().year,
+                 end_month=datetime.date.today().month,
+                 end_day=datetime.date.today().day):
+
+    start_date = datetime.date(start_year, start_month, start_day)
+    end_date = datetime.date(end_year, end_month, end_day)
+
+    data = fetch_detail_range(start_date, end_date)
+
+    title = '{} to {} detail'.format(start_date, end_date)
+    print(title)
+
+    writer = pd.ExcelWriter('./output/{}.xlsx'.format(title), engine='xlsxwriter')
+    data.to_excel(writer, 'Booking details')
+    writer.save()
+
+
+def detail_month(year = datetime.datetime.now().year, month = datetime.datetime.now().month):
+    start_date = datetime.date(year,month,1)
+    end_date = start_date + relativedelta(months = +1)
+    return detail_range(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day)
 
 
 def report_range(start_year=2016, start_month=8, start_day=1, 
