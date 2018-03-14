@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 from oauth2client import client
 from googleapiclient import sample_tools
 
-from .Database import *
+from .Database_secrets import *
 
 proj_to_PI = PI.get_proj_dict()
 PI_dict = PI.get_PI_dict()
